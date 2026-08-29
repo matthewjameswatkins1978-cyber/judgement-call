@@ -1,0 +1,232 @@
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: #f4f6f8;
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 20px;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+header h1 {
+    font-size: 2.5rem;
+    color: #1a202c;
+    margin-bottom: 5px;
+    letter-spacing: 1px;
+}
+
+.tagline {
+    font-size: 1.1rem;
+    color: #4a5568;
+    font-style: italic;
+}
+
+.view {
+    display: none;
+}
+
+.view.active {
+    display: block;
+}
+
+.card {
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+    margin-bottom: 20px;
+}
+
+.description {
+    color: #4a5568;
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #2d3748;
+}
+
+textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #cbd5e0;
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 1rem;
+    box-sizing: border-box;
+    resize: vertical;
+}
+
+.btn {
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn.primary {
+    background-color: #3182ce;
+    color: white;
+}
+
+.btn.primary:hover {
+    background-color: #2b6cb0;
+}
+
+.btn.secondary {
+    background-color: #e2e8f0;
+    color: #2d3748;
+}
+
+.btn.secondary:hover {
+    background-color: #cbd5e0;
+}
+
+.status.quiet {
+    color: #4a5568;
+    font-style: italic;
+}
+
+.timeline-container {
+    margin-top: 20px;
+}
+
+.timeline {
+    list-style-type: none;
+    padding: 0;
+}
+
+.timeline-item {
+    padding: 10px 15px;
+    border-left: 3px solid #3182ce;
+    background: #f7fafc;
+    margin-bottom: 8px;
+    border-radius: 0 4px 4px 0;
+}
+
+.decision-card h4 {
+    margin-top: 15px;
+    margin-bottom: 5px;
+    color: #2d3748;
+}
+
+.code-block {
+    background: #edf2f7;
+    padding: 10px;
+    border-radius: 4px;
+    font-family: monospace;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
+.options-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.option-btn {
+    text-align: left;
+    padding: 15px;
+    background: #f7fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.option-btn:hover {
+    background: #ebf8ff;
+    border-color: #3182ce;
+}
+
+.option-label {
+    font-weight: bold;
+    color: #2b6cb0;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.option-consequence {
+    font-size: 0.9rem;
+    color: #4a5568;
+}
+
+.badge {
+    display: inline-block;
+    padding: 6px 12px;
+    font-weight: bold;
+    border-radius: 4px;
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+}
+
+.badge.pass {
+    background: #c6f6d5;
+    color: #22543d;
+}
+
+.badge.fail {
+    background: #fed7d7;
+    color: #742a2a;
+}
+
+.diff-block {
+    background: #1a202c;
+    color: #e2e8f0;
+    padding: 15px;
+    border-radius: 6px;
+    overflow-x: auto;
+    font-size: 0.9rem;
+    max-height: 300px;
+}
+
+.receipt-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.receipt-item {
+    background: #f7fafc;
+    padding: 15px;
+    border-radius: 6px;
+    text-align: center;
+    border: 1px solid #e2e8f0;
+}
+
+.receipt-value {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #2d3748;
+    display: block;
+    margin-top: 5px;
+}
+
+.receipt-label {
+    font-size: 0.85rem;
+    color: #718096;
+}
