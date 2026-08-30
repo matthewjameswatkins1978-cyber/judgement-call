@@ -1,5 +1,4 @@
 import logging
-from typing import Any, Callable
 
 from strands import Agent
 from strands.vended_interventions.cedar import CedarAuthorization
@@ -47,8 +46,9 @@ def create_worker_agent(
     for k, v in contract.frozen_constraints.items():
         system_prompt += f"- {k}: {v}\n"
     system_prompt += (
-        "Inspect the codebase using list_tree, read_text, search_text, make code changes using write_text, "
-        "run acceptance tests using run_tests, and request decisions using request_decision when trade-offs arise.\n"
+        "Inspect codebase using list_tree, read_text, search_text, "
+        "write code using write_text, run acceptance tests using run_tests, "
+        "and request decisions using request_decision when trade-offs arise.\n"
         "Always provide concrete evidence when requesting decisions."
     )
 
