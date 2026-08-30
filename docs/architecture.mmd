@@ -1,0 +1,47 @@
+%% JUDGEMENT CALL Architecture Mermaid Diagram
+%% Illustrating Developer, Web UI / AgentCore, JudgementCallService, Worker Agent, Cedar Policy, Attention Governor, Gate Agent, and Strands Interrupt Loop
+
+sequenceDiagram
+    autonumber
+    actor Developer
+    participant UI as Web UI / AgentCore
+    participant Svc as JudgementCallService
+    participant Worker as Worker Agent (Strands)
+    participant Cedar as Cedar Policy Engine
+    participant Gov as Attention Governor
+    participant Gate as Gate Agent
+
+    Developer->>UI: Start coding task / scenario
+    UI->>Svc: POST /api/start (scenario, task)
+    Svc->>Worker: Initialize Strands Agent session
+    
+    loop Agent Execution Loop
+        Worker->>Cedar: Authorize tool action (e.g. write_text / request_decision)
+        Cedar--//Worker: Permit / Deny (Default Deny)
+        
+        alt Tool is request_decision()
+            Worker->>Gov: request_decision(proposal)
+            Gov->>Gov: Evaluate deterministic rules
+            
+            alt Ambiguous / Material Proposal
+                Gov->>Gate: Classify proposal risk
+                Gate--//Gov: ASK_HUMAN or AUTO_RESOLVE
+            end
+            
+            alt Action is AUTO_RESOLVE
+                Gov--//Worker: Auto-resolve choice & resume
+            else Action is ASK_HUMAN
+                Gov--//Worker: Trigger Strands Interrupt
+                Worker-->>Svc: Interrupt payload (Decision Card)
+                Svc-->>UI: Render Decision Card
+                UI-->>Developer: Prompt for human judgment
+                Developer->>UI: Submit choice / note
+                UI->>Svc: POST /api/resume (interrupt_id, response)
+                Svc->>Worker: Inject response & resume session
+            end
+        end
+    end
+
+    Worker-->>Svc: Task execution complete & verification passed
+    Svc-->>UI: Final Diff + Attention Receipt
+    UI-->>Developer: Display success summary
