@@ -1,11 +1,10 @@
 import logging
 import uuid
-from typing import Any, Optional
+from typing import Optional
 
 from judgement_call.agent import create_worker_agent
 from judgement_call.contracts import (
     CompletedResponse,
-    DecisionCard,
     FailureCode,
     FailureResponse,
     NeedsHumanResponse,
@@ -75,8 +74,8 @@ class JudgementCallService:
                     break
 
         if not session:
-            # Fallback for mock tests where session might not be explicitly stored or mock run_id used
-            # Create a dummy session or return failure
+            # Fallback for mock tests where session might not be explicitly
+            # stored or mock run_id used. Create dummy or return failure.
             return FailureResponse(
                 run_id=session_id or request.interrupt_id,
                 code=FailureCode.INVALID_SESSION,
@@ -94,12 +93,14 @@ class JudgementCallService:
         choice_id = request.response.choice_id
         note = request.response.note or ""
 
-        return self._execute_run(session, f"User resumed with choice {choice_id}. Note: {note}")
+        return self._execute_run(
+            session, f"User resumed with choice {choice_id}. Note: {note}"
+        )
 
     def _execute_run(self, session: RunSession, prompt: str) -> RunResponse:
         try:
             # Run agent
-            res = session.agent(prompt)
+            session.agent(prompt)
 
             # Check if there are pending interrupts
             if session.governor.pending_interrupts:
