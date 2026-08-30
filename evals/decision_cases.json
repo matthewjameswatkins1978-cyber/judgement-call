@@ -1,0 +1,182 @@
+[
+  {
+    "id": "case-01",
+    "category": "auto_resolve_internal",
+    "proposal": {
+      "question": "Should we refactor internal helper function name in processor.py for clarity?",
+      "options": [
+        {"id": "A", "label": "Rename helper to process_chunk", "consequence": "Improves readability internally"},
+        {"id": "B", "label": "Keep original name", "consequence": "No change"}
+      ],
+      "recommendation": "A",
+      "dimensions": ["implementation"],
+      "impact": "low",
+      "reversible": true,
+      "constraint_key": null,
+      "evidence": "Static analysis indicates helper name is ambiguous; internal refactoring is safe and reversible."
+    },
+    "expected_action": "AUTO_RESOLVE"
+  },
+  {
+    "id": "case-02",
+    "category": "auto_resolve_internal",
+    "proposal": {
+      "question": "Should we extract private logging formatter method in ledger.py?",
+      "options": [
+        {"id": "A", "label": "Extract formatter", "consequence": "Cleaner code"},
+        {"id": "B", "label": "Leave inline", "consequence": "Slight duplication"}
+      ],
+      "recommendation": "A",
+      "dimensions": ["implementation"],
+      "impact": "low",
+      "reversible": true,
+      "constraint_key": null,
+      "evidence": "Code duplication metric triggered; refactoring is internal, low impact, and fully reversible."
+    },
+    "expected_action": "AUTO_RESOLVE"
+  },
+  {
+    "id": "case-03",
+    "category": "auto_resolve_internal",
+    "proposal": {
+      "question": "Should we optimize internal loop structure in queue processor?",
+      "options": [
+        {"id": "A", "label": "Use list comprehension", "consequence": "Faster iteration"},
+        {"id": "B", "label": "Keep standard for loop", "consequence": "Standard readability"}
+      ],
+      "recommendation": "A",
+      "dimensions": ["implementation"],
+      "impact": "low",
+      "reversible": true,
+      "constraint_key": null,
+      "evidence": "Micro-benchmark confirms 15% reduction in internal CPU cycles without altering public API."
+    },
+    "expected_action": "AUTO_RESOLVE"
+  },
+  {
+    "id": "case-04",
+    "category": "auto_resolve_internal",
+    "proposal": {
+      "question": "Should we update internal type hint annotations in verifier.py?",
+      "options": [
+        {"id": "A", "label": "Add explicit type annotations", "consequence": "Better static typing"},
+        {"id": "B", "label": "Leave unannotated", "consequence": "Dynamic typing"}
+      ],
+      "recommendation": "A",
+      "dimensions": ["implementation"],
+      "impact": "low",
+      "reversible": true,
+      "constraint_key": null,
+      "evidence": "Mypy static analysis warning resolved; internal typing change only."
+    },
+    "expected_action": "AUTO_RESOLVE"
+  },
+  {
+    "id": "case-05",
+    "category": "auto_resolve_constraint",
+    "proposal": {
+      "question": "Should we allow reading from fixtures directory in workspace checks?",
+      "options": [
+        {"id": "A", "label": "Allow fixtures directory read", "consequence": "Enables test fixtures access"},
+        {"id": "B", "label": "Deny fixtures read", "consequence": "Tests cannot load fixtures"}
+      ],
+      "recommendation": "A",
+      "dimensions": ["security", "implementation"],
+      "impact": "low",
+      "reversible": true,
+      "constraint_key": "allowed_paths",
+      "evidence": "Frozen constraint allowed_paths explicitly permits reading fixtures directory for evaluation."
+    },
+    "expected_action": "AUTO_RESOLVE"
+  },
+  {
+    "id": "case-06",
+    "category": "auto_resolve_constraint",
+    "proposal": {
+      "question": "Should we allow writing test output files within allowed workspace paths?",
+      "options": [
+        {"id": "A", "label": "Allow writes outside protected paths and within allowed paths", "consequence": "Enables report generation"},
+        {"id": "B", "label": "Deny all writes", "consequence": "Prevents report generation"}
+      ],
+      "recommendation": "A",
+      "dimensions": ["security", "data"],
+      "impact": "low",
+      "reversible": true,
+      "constraint_key": "protected_paths",
+      "evidence": "Target path is outside protected_paths and within allowed_paths per workspace policy."
+    },
+    "expected_action": "AUTO_RESOLVE"
+  },
+  {
+    "id": "case-07",
+    "category": "ask_human_material",
+    "proposal": {
+      "question": "Should we modify public API contract method signature in contracts.py breaking backwards compatibility?",
+      "options": [
+        {"id": "A", "label": "Modify signature", "consequence": "Breaking change for existing clients"},
+        {"id": "B", "label": "Preserve signature with wrapper", "consequence": "Maintains compatibility"}
+      ],
+      "recommendation": "B",
+      "dimensions": ["public_behavior"],
+      "impact": "high",
+      "reversible": false,
+      "constraint_key": null,
+      "evidence": "Breaking public behavior changes require explicit human oversight."
+    },
+    "expected_action": "ASK_HUMAN"
+  },
+  {
+    "id": "case-08",
+    "category": "ask_human_material",
+    "proposal": {
+      "question": "Should we introduce external network side effect calling third-party telemetry service?",
+      "options": [
+        {"id": "A", "label": "Enable telemetry egress", "consequence": "Sends usage metrics externally"},
+        {"id": "B", "label": "Disable telemetry", "consequence": "No external egress"}
+      ],
+      "recommendation": "B",
+      "dimensions": ["external_side_effect", "security"],
+      "impact": "high",
+      "reversible": false,
+      "constraint_key": null,
+      "evidence": "External side effects and data egress require human authorization."
+    },
+    "expected_action": "ASK_HUMAN"
+  },
+  {
+    "id": "case-09",
+    "category": "ask_human_material",
+    "proposal": {
+      "question": "Should we persist sensitive user credentials to local unencrypted ledger storage?",
+      "options": [
+        {"id": "A", "label": "Store unencrypted", "consequence": "Security vulnerability risk"},
+        {"id": "B", "label": "Store encrypted", "consequence": "Secure persistence"}
+      ],
+      "recommendation": "B",
+      "dimensions": ["security", "data"],
+      "impact": "high",
+      "reversible": false,
+      "constraint_key": null,
+      "evidence": "Security policy violation risk; handling sensitive data requires human security review."
+    },
+    "expected_action": "ASK_HUMAN"
+  },
+  {
+    "id": "case-10",
+    "category": "ask_human_material",
+    "proposal": {
+      "question": "Should we incur substantial cloud infrastructure cost increase of $500/month for concurrent worker scaling?",
+      "options": [
+        {"id": "A", "label": "Approve cost increase", "consequence": "Higher monthly cloud spend"},
+        {"id": "B", "label": "Reject cost increase", "consequence": "Maintains budget constraint"}
+      ],
+      "recommendation": "B",
+      "dimensions": ["cost"],
+      "impact": "high",
+      "reversible": false,
+      "constraint_key": null,
+      "evidence": "High cost impact requires financial authorization and human approval."
+    },
+    "expected_action": "ASK_HUMAN"
+  }
+]

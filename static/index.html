@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JUDGEMENT CALL</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>JUDGEMENT CALL</h1>
+            <p class="tagline">Only ask me when I'm useful.</p>
+        </header>
+
+        <main>
+            <!-- Initial View -->
+            <div id="initial-view" class="view active">
+                <div class="card">
+                    <h2>Concurrency Demo Task</h2>
+                    <p class="description">Make process_items() execute work concurrently while preserving its existing public call signature and successful-result ordering.</p>
+                    <div class="form-group">
+                        <label for="task-input">Task Instruction:</label>
+                        <textarea id="task-input" rows="4">Make process_items() execute work concurrently while preserving its existing public call signature and successful-result ordering.</textarea>
+                    </div>
+                    <button id="start-btn" class="btn primary">Start Judgement Call Run</button>
+                </div>
+            </div>
+
+            <!-- Running View -->
+            <div id="running-view" class="view">
+                <div class="card">
+                    <h2>Agent Running...</h2>
+                    <p id="status-message" class="status quiet">Executing task with Attention Governor oversight...</p>
+                    <div class="timeline-container">
+                        <h3>Event Timeline</h3>
+                        <ul id="event-timeline" class="timeline">
+                            <li class="timeline-item">Run initiated. Inspecting codebase and evaluating choices...</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Decision View -->
+            <div id="decision-view" class="view">
+                <div class="card decision-card">
+                    <h2>Human Attention Required</h2>
+                    <div class="decision-section">
+                        <h4>Question</h4>
+                        <p id="decision-question"></p>
+                    </div>
+                    <div class="decision-section">
+                        <h4>Why Human Attention Is Needed</h4>
+                        <p id="decision-why"></p>
+                    </div>
+                    <div class="decision-section">
+                        <h4>Evidence</h4>
+                        <p id="decision-evidence" class="code-block"></p>
+                    </div>
+                    <div class="decision-section">
+                        <h4>Options & Consequences</h4>
+                        <div id="decision-options" class="options-container"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Completed View -->
+            <div id="completed-view" class="view">
+                <div class="card">
+                    <h2>Run Completed</h2>
+                    <div class="result-status">
+                        <span id="verification-badge" class="badge"></span>
+                    </div>
+                    <div class="result-section">
+                        <h3>Concise Unified Diff</h3>
+                        <pre id="diff-output" class="diff-block"></pre>
+                    </div>
+                    <div class="result-section">
+                        <h3>Attention Receipt Counters</h3>
+                        <div id="receipt-grid" class="receipt-grid"></div>
+                    </div>
+                    <button id="restart-btn" class="btn secondary">Start New Run</button>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="/static/app.js"></script>
+</body>
+</html>

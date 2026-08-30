@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=61.0.0", "build"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "judgement-call"
+version = "0.1.0"
+description = "A Strands-based professional coding agent that completes bounded software tasks autonomously while suppressing unnecessary human interruptions."
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: MIT License",
+]
+dependencies = [
+    "strands-agents[cedar]>=1,<2",
+    "bedrock-agentcore",
+    "pydantic>=2,<3",
+    "fastapi>=0.116,<1",
+    "uvicorn>=0.35,<1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8,<9",
+    "ruff",
+    "build",
+    "strands-agents-evals>=1,<2",
+]
+deploy = [
+    "bedrock-agentcore-starter-toolkit",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
+ignore = []
