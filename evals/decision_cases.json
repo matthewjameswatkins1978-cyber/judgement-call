@@ -45,7 +45,7 @@
         {"id": "B", "label": "Keep standard for loop", "consequence": "Standard readability"}
       ],
       "recommendation": "A",
-      "dimensions": ["implementation", "cost"],
+      "dimensions": ["implementation"],
       "impact": "low",
       "reversible": true,
       "constraint_key": null,
@@ -63,7 +63,7 @@
         {"id": "B", "label": "Leave unannotated", "consequence": "Dynamic typing"}
       ],
       "recommendation": "A",
-      "dimensions": ["implementation", "data"],
+      "dimensions": ["implementation"],
       "impact": "low",
       "reversible": true,
       "constraint_key": null,

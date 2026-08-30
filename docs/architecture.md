@@ -67,8 +67,8 @@ Worker Agent (`Strands` Agent)    Cedar Policy Engine (`policies/agent.cedar`)
 The Attention Governor evaluates incoming `DecisionProposal` payloads using a multi-tiered evaluation strategy:
 
 1. **Deterministic Auto-Resolve Rules**:
-   - **Internal / Reversible**: Proposals where `reversible=true`, impact is `low`, and dimensions are strictly internal (e.g., `implementation`, `data`, internal loop refactoring, helper naming) are automatically resolved (`AUTO_RESOLVE`).
-   - **Constraint Compliance**: Changes that strictly adhere to predefined workspace task contracts and do not modify protected paths are auto-resolved if low-impact.
+   - **Internal / Reversible**: Proposals where `reversible=true`, impact is `low` or `medium`, and the only dimension is `implementation` are automatically resolved (`AUTO_RESOLVE`). The Governor returns `Guide` feedback containing the selected choice so the Worker continues without repeating the proposal.
+   - **Constraint Compliance**: A proposal whose declared `constraint_key` matches a non-empty frozen task constraint is auto-resolved when the constraint determines the recommended option and the proposal remains reversible and low/medium impact. The Governor also returns `Guide` feedback for this path.
 
 2. **Ambiguity Escalation (Gate Classifier)**:
    - If a proposal involves high impact, irreversible changes, public behavior modifications (API signature changes, backwards compatibility breaks), security concerns (path validation, credentials), cost impacts, or external side effects, deterministic rules pass it to the **Gate Agent**.
@@ -77,7 +77,7 @@ The Attention Governor evaluates incoming `DecisionProposal` payloads using a mu
      - `ASK_HUMAN` (escalating to human review).
 
 3. **Baseline Guarantee**:
-   - When governor evaluation is disabled (e.g. in baseline comparison mode), every proposal forces `ASK_HUMAN`.
+   - When governor evaluation is disabled (e.g. in baseline comparison mode), every valid proposal forces `ASK_HUMAN`.
 
 ---
 
@@ -124,8 +124,8 @@ The execution lifecycle of a session flows through distinct phases tracked in me
    - Attention Governor intercepts the call.
 
 3. **Governor Evaluation**:
-   - **Auto-Resolve Path**: Governor returns `AUTO_RESOLVE`. The agent continues execution immediately without interruption. Ledger records the resolved choice.
-   - **Ask-Human Path**: Governor returns `ASK_HUMAN`. Strands triggers an interruption. A **Decision Card** is generated and returned to the client.
+   - **Auto-Resolve Path**: The Gate contract records `AUTO_RESOLVE`; the Governor returns a `Guide` action containing the selected choice. The Worker continues without an interruption. Ledger records the resolved choice.
+   - **Ask-Human Path**: The Gate contract records `ASK_HUMAN`; the Governor calls the raw Strands `event.interrupt()` path. The first call pauses the loop and creates a **Decision Card**. On resume, the interrupt returns the selected choice and the Governor returns `Proceed` so the original tool call can continue.
 
 4. **Human Response & Resumption (`resume`)**:
    - Developer reviews the Decision Card in the Web UI and selects a choice.

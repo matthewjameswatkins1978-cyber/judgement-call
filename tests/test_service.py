@@ -126,9 +126,14 @@ def test_service_resume_maps_choice_id():
             assert isinstance(resp, CompletedResponse)
             assert resp.run_id == session_id
             mock_agent.assert_called_once()
-            called_prompt = mock_agent.call_args[0][0]
-            assert "A" in called_prompt
-            assert "Proceeding with A" in called_prompt
+            assert mock_agent.call_args[0][0] == [
+                {
+                    "interruptResponse": {
+                        "interruptId": "int-123",
+                        "response": "A",
+                    }
+                }
+            ]
 
 
 def test_service_same_session_id_preserved():

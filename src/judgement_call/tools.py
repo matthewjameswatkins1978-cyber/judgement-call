@@ -140,6 +140,7 @@ def create_product_tools(
         impact: str,
         reversible: bool,
         evidence: str,
+        constraint_key: str | None = None,
     ) -> str:
         """Request human decision or governor auto-resolution."""
         return recommendation

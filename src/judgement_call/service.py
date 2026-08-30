@@ -27,7 +27,15 @@ class RunSession:
         self.contract = contract
         self.workspace = WorkspaceManager(fixture_src="fixtures/concurrency_demo")
         self.ledger = RunLedger()
-        self.governor = AttentionGovernor(ledger=self.ledger, governor_enabled=True)
+        self.governor = AttentionGovernor(
+            ledger=self.ledger,
+            governor_enabled=True,
+            frozen_constraints={
+                **contract.frozen_constraints,
+                "allowed_paths": ", ".join(contract.allowed_paths),
+                "protected_paths": ", ".join(contract.protected_paths),
+            },
+        )
         self.agent = create_worker_agent(
             workspace=self.workspace,
             ledger=self.ledger,
@@ -89,13 +97,19 @@ class JudgementCallService:
             first_key = list(session.governor.pending_interrupts.keys())[0]
             card = session.governor.pending_interrupts.pop(first_key)
 
-        # Resume agent execution with user choice
+        # Resume the original Strands interrupt. The Governor's raw
+        # event.interrupt() call receives this choice and returns Proceed.
         choice_id = request.response.choice_id
-        note = request.response.note or ""
+        interrupt_response = [
+            {
+                "interruptResponse": {
+                    "interruptId": request.interrupt_id,
+                    "response": choice_id,
+                }
+            }
+        ]
 
-        return self._execute_run(
-            session, f"User resumed with choice {choice_id}. Note: {note}"
-        )
+        return self._execute_run(session, interrupt_response)
 
     def _execute_run(self, session: RunSession, prompt: str) -> RunResponse:
         try:

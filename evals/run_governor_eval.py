@@ -3,14 +3,21 @@ import json
 import sys
 from pathlib import Path
 
+from strands.interrupt import Interrupt, InterruptException
+
 from judgement_call.governor import AttentionGovernor
 from judgement_call.ledger import RunLedger
 
 
 class MockEvent:
-    def __init__(self, tool_name: str, tool_args: dict):
+    def __init__(self, tool_name: str, tool_args: dict, interrupt_id: str):
         self.tool_name = tool_name
         self.tool_args = tool_args
+        self.tool_use = {"name": tool_name, "input": tool_args, "toolUseId": interrupt_id}
+        self.interrupt_id = interrupt_id
+
+    def interrupt(self, name: str, reason: str):
+        raise InterruptException(Interrupt(self.interrupt_id, name, reason))
 
 
 def run_evaluation(dataset_path: str | Path = "evals/decision_cases.json") -> dict:
@@ -27,16 +34,26 @@ def run_evaluation(dataset_path: str | Path = "evals/decision_cases.json") -> di
         ledger=baseline_ledger, governor_enabled=False
     )
 
-    for case in cases:
+    for index, case in enumerate(cases):
         proposal_dict = case["proposal"]
-        event = MockEvent("request_decision", proposal_dict)
-        baseline_governor.before_tool_call(event)
+        event = MockEvent("request_decision", proposal_dict, f"baseline-{index}")
+        try:
+            baseline_governor.before_tool_call(event)
+        except InterruptException:
+            pass
 
     baseline_receipt = baseline_ledger.receipt()
 
     # 2. Attention Governor Mode (governor_enabled=True)
     governor_ledger = RunLedger()
-    governor = AttentionGovernor(ledger=governor_ledger, governor_enabled=True)
+    governor = AttentionGovernor(
+        ledger=governor_ledger,
+        governor_enabled=True,
+        frozen_constraints={
+            "allowed_paths": "fixtures directory",
+            "protected_paths": "protected paths",
+        },
+    )
 
     results = []
     false_suppressions = 0
@@ -51,19 +68,25 @@ def run_evaluation(dataset_path: str | Path = "evals/decision_cases.json") -> di
         if expected_action == "ASK_HUMAN":
             expected_ask_count += 1
 
-        event = MockEvent("request_decision", proposal_dict)
-        action = governor.before_tool_call(event)
+        event = MockEvent("request_decision", proposal_dict, f"governor-{case_id}")
+        auto_resolved_before = governor_ledger.receipt().auto_resolved
+        try:
+            action = governor.before_tool_call(event)
+        except InterruptException:
+            action = None
 
         # Determine actual action taken by governor
-        actual_action = "AUTO_RESOLVE"
-        if action.type == "confirm":
-            resp_val = getattr(action, "response", "")
-            if resp_val and str(resp_val).startswith("int-"):
-                actual_action = "ASK_HUMAN"
-            else:
-                actual_action = "AUTO_RESOLVE"
-        elif action.type == "guide":
+        if action is None:
             actual_action = "ASK_HUMAN"
+        elif (
+            action.type == "guide"
+            and governor_ledger.receipt().auto_resolved > auto_resolved_before
+        ):
+            actual_action = "AUTO_RESOLVE"
+        elif action.type == "guide":
+            actual_action = "GUIDE"
+        else:
+            actual_action = "OTHER"
 
         if expected_action == "ASK_HUMAN":
             if actual_action == "ASK_HUMAN":
