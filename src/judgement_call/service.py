@@ -103,12 +103,14 @@ class JudgementCallService:
 
             # Check if there are pending interrupts
             if session.governor.pending_interrupts:
-                interrupt_id, card = list(session.governor.pending_interrupts.items())[0]
-                return NeedsHumanResponse(
-                    run_id=session.run_id,
-                    decision=card,
-                    receipt=session.ledger.receipt(),
-                )
+                items = list(session.governor.pending_interrupts.items())
+                if items:
+                    interrupt_id, card = items[0]
+                    return NeedsHumanResponse(
+                        run_id=session.run_id,
+                        decision=card,
+                        receipt=session.ledger.receipt(),
+                    )
 
             # If no pending interrupts, run independent verifier
             verifier = IndependentVerifier(session.workspace, session.contract)
