@@ -182,23 +182,25 @@ class AttentionGovernor(InterventionHandler):
         if frozen_text not in option_text:
             return False
 
-        # These are deliberately narrow action words. A generic statement such
-        # as "use the constraint" is ambiguous and must reach the Gate.
-        compliance_markers = (
+        # These are deliberately narrow and constraint-specific. A generic
+        # statement such as "use the constraint" is ambiguous and must reach
+        # the Gate.
+        preservation_markers = (
             "keep ",
             "preserve ",
             "retain ",
             "maintain ",
             "unchanged",
             "same ",
-            "follow ",
-            "respect ",
-            "allow ",
-            "within ",
-            "inside ",
-            "avoid ",
-            "no new ",
         )
+        if proposal.constraint_key == "allowed_paths":
+            compliance_markers = ("allow ", "within ", "inside ")
+        elif proposal.constraint_key == "protected_paths":
+            compliance_markers = ("outside ", "avoid ", "not ")
+        elif proposal.constraint_key == "dependency_policy":
+            compliance_markers = preservation_markers + ("no new ", "avoid ")
+        else:
+            compliance_markers = preservation_markers
         if not any(marker in option_text for marker in compliance_markers):
             return False
 
@@ -208,6 +210,7 @@ class AttentionGovernor(InterventionHandler):
             "modify ",
             "modifies ",
             "break ",
+            "breaks ",
             "breaking ",
             "violate ",
             "violates ",
@@ -218,6 +221,12 @@ class AttentionGovernor(InterventionHandler):
             "different ",
             "disable ",
             "deny ",
+            "incompatible",
+            "incompatibility",
+            "conflict ",
+            "conflicts ",
+            "contradict ",
+            "contradicts ",
         )
         if proposal.constraint_key != "protected_paths":
             contradiction_markers += ("outside ",)
