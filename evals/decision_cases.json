@@ -77,7 +77,7 @@
     "proposal": {
       "question": "Should we allow reading from fixtures directory in workspace checks?",
       "options": [
-        {"id": "A", "label": "Allow fixtures read", "consequence": "Enables test fixtures access"},
+        {"id": "A", "label": "Allow fixtures directory read", "consequence": "Enables test fixtures access"},
         {"id": "B", "label": "Deny fixtures read", "consequence": "Tests cannot load fixtures"}
       ],
       "recommendation": "A",
@@ -95,7 +95,7 @@
     "proposal": {
       "question": "Should we allow writing test output files within allowed workspace paths?",
       "options": [
-        {"id": "A", "label": "Allow write within allowed paths", "consequence": "Enables report generation"},
+        {"id": "A", "label": "Allow writes outside protected paths and within allowed paths", "consequence": "Enables report generation"},
         {"id": "B", "label": "Deny all writes", "consequence": "Prevents report generation"}
       ],
       "recommendation": "A",

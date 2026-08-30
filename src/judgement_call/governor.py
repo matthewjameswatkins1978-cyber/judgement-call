@@ -1,4 +1,5 @@
 import logging
+import re
 from collections.abc import Mapping
 from typing import Any
 
@@ -15,6 +16,10 @@ from judgement_call.gate import GateDecider, StrandsGateDecider
 from judgement_call.ledger import RunLedger
 
 logger = logging.getLogger(__name__)
+
+
+def _normalize_constraint_text(value: str) -> str:
+    return " ".join(value.casefold().split())
 
 
 class AttentionGovernor(InterventionHandler):
@@ -114,17 +119,10 @@ class AttentionGovernor(InterventionHandler):
                 and proposal.impact in {"low", "medium"}
                 and proposal.reversible
             )
-            # 2. A declared, evidenced frozen constraint determines the choice.
-            matching_constraint = (
-                proposal.constraint_key is not None
-                and proposal.constraint_key in self.frozen_constraints
-                and bool(str(self.frozen_constraints[proposal.constraint_key]).strip())
-                and (
-                    proposal.constraint_key.casefold() in proposal.evidence.casefold()
-                    or str(self.frozen_constraints[proposal.constraint_key]).casefold()
-                    in proposal.evidence.casefold()
-                )
-            )
+            # 2. A frozen constraint may auto-resolve only when the recommended
+            # option itself provides a conservative, deterministic compliance
+            # proof. Evidence mentioning a constraint is never sufficient.
+            matching_constraint = self._recommended_option_satisfies_constraint(proposal)
 
             gate_decision: GateDecision
             if safe_implementation or matching_constraint:
@@ -160,6 +158,83 @@ class AttentionGovernor(InterventionHandler):
             return self._ask_human(event, proposal, why_human=gate_decision.reason)
 
         return Proceed(reason="Non-decision tool call is allowed.")
+
+    def _recommended_option_satisfies_constraint(self, proposal: DecisionProposal) -> bool:
+        if proposal.constraint_key is None:
+            return False
+        frozen_value = self.frozen_constraints.get(proposal.constraint_key)
+        if not isinstance(frozen_value, str) or not frozen_value.strip():
+            return False
+
+        option = next(
+            (
+                candidate
+                for candidate in proposal.options
+                if candidate.id == proposal.recommendation
+            ),
+            None,
+        )
+        if option is None:
+            return False
+
+        option_text = _normalize_constraint_text(f"{option.label} {option.consequence}")
+        frozen_text = _normalize_constraint_text(frozen_value)
+        if frozen_text not in option_text:
+            return False
+
+        # These are deliberately narrow action words. A generic statement such
+        # as "use the constraint" is ambiguous and must reach the Gate.
+        compliance_markers = (
+            "keep ",
+            "preserve ",
+            "retain ",
+            "maintain ",
+            "unchanged",
+            "same ",
+            "follow ",
+            "respect ",
+            "allow ",
+            "within ",
+            "inside ",
+            "avoid ",
+            "no new ",
+        )
+        if not any(marker in option_text for marker in compliance_markers):
+            return False
+
+        contradiction_markers = (
+            "change ",
+            "changes ",
+            "modify ",
+            "modifies ",
+            "break ",
+            "breaking ",
+            "violate ",
+            "violates ",
+            "ignore ",
+            "bypass ",
+            "remove ",
+            "replace ",
+            "different ",
+            "disable ",
+            "deny ",
+        )
+        if proposal.constraint_key != "protected_paths":
+            contradiction_markers += ("outside ",)
+        if any(marker in option_text for marker in contradiction_markers):
+            return False
+        if re.search(r"(?<!no )\bnew\b", option_text):
+            return False
+
+        # A protected-path constraint is satisfied by an option that explicitly
+        # keeps the action outside or away from the protected paths. Merely
+        # saying "allow" while naming protected paths is not enough.
+        if proposal.constraint_key == "protected_paths" and not (
+            any(marker in option_text for marker in ("outside ", "avoid "))
+            or "not " in option_text
+        ):
+            return False
+        return True
 
     def _proposal_from_tool_args(self, tool_args: dict[str, Any]) -> DecisionProposal:
         from judgement_call.contracts import DecisionOption

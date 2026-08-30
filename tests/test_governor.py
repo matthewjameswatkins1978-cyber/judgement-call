@@ -162,7 +162,11 @@ def test_governor_matching_frozen_constraint_auto_resolves():
         {
             "question": "Which signature should remain?",
             "options": [
-                {"id": "A", "label": "Keep frozen signature", "consequence": "Compatibility"},
+                {
+                    "id": "A",
+                    "label": "Keep process_items(items, worker) signature",
+                    "consequence": "Preserves compatibility",
+                },
                 {"id": "B", "label": "Change signature", "consequence": "Breaks callers"},
             ],
             "recommendation": "A",
@@ -179,6 +183,94 @@ def test_governor_matching_frozen_constraint_auto_resolves():
     assert action.type == "guide"
     assert "choice 'A'" in action.feedback
     assert ledger.receipt().auto_resolved == 1
+
+
+def test_governor_constraint_text_in_evidence_cannot_override_contradictory_option():
+    ledger = RunLedger()
+    governor = AttentionGovernor(
+        ledger=ledger,
+        gate_decider=MockGateDecider(
+            GateDecision(action="ASK_HUMAN", reason="Public contract requires review")
+        ),
+        governor_enabled=True,
+        frozen_constraints={"public_signature": "process_items(items, worker)"},
+    )
+    event = RawInterruptEvent(
+        {
+            "question": "Should we break the public API?",
+            "options": [
+                {
+                    "id": "A",
+                    "label": "Change signature to process_items(items, worker)",
+                    "consequence": "Breaks callers",
+                },
+                {
+                    "id": "B",
+                    "label": "Keep process_items(items, worker) signature",
+                    "consequence": "Preserves callers",
+                },
+            ],
+            "recommendation": "A",
+            "dimensions": [Dimensions.PUBLIC_BEHAVIOR.value],
+            "impact": Impact.HIGH.value,
+            "reversible": False,
+            "constraint_key": "public_signature",
+            "evidence": (
+                "The frozen public_signature process_items(items, worker) "
+                "constraint is acknowledged."
+            ),
+        }
+    )
+
+    with pytest.raises(InterruptException):
+        governor.before_tool_call(event)
+
+    assert ledger.receipt().auto_resolved == 0
+    assert ledger.receipt().human_interrupts == 1
+
+
+def test_governor_ambiguous_constraint_satisfaction_fails_closed():
+    ledger = RunLedger()
+    governor = AttentionGovernor(
+        ledger=ledger,
+        gate_decider=MockGateDecider(
+            GateDecision(action="ASK_HUMAN", reason="Constraint compliance is ambiguous")
+        ),
+        governor_enabled=True,
+        frozen_constraints={"public_signature": "process_items(items, worker)"},
+    )
+    event = RawInterruptEvent(
+        {
+            "question": "Which signature should be used?",
+            "options": [
+                {
+                    "id": "A",
+                    "label": "Use process_items(items, worker)",
+                    "consequence": "Candidate implementation",
+                },
+                {
+                    "id": "B",
+                    "label": "Use another signature",
+                    "consequence": "Unknown compatibility",
+                },
+            ],
+            "recommendation": "A",
+            "dimensions": [Dimensions.PUBLIC_BEHAVIOR.value],
+            "impact": Impact.HIGH.value,
+            "reversible": False,
+            "constraint_key": "public_signature",
+            "evidence": (
+                "The frozen public_signature process_items(items, worker) constraint "
+                "is mentioned, but compliance is not established."
+            ),
+        }
+    )
+
+    with pytest.raises(InterruptException):
+        governor.before_tool_call(event)
+
+    assert ledger.receipt().auto_resolved == 0
+    assert ledger.receipt().human_interrupts == 1
 
 
 @pytest.mark.parametrize(
